@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script type="text/javascript" src="./node_modules/d3/dist/d3.js"></script>
+        <style>
+            div.bar {
+            display: inline-block;
+            width: 20px;
+            height: 75px;   /* We'll override this later */
+            background-color: teal;
+            margin-right: 2px;
+            }
+            .separator {
+    border-bottom: 2px solid #e1e4e8!important;
+            }
+            svg {
+                margin: 5px;
+            }
+            circle:hover {
+                opacity: 0.3;
+            }
+        </style>
+        
+    </head>
+    <body>
+        
+        <script type="text/javascript">
+          var dataset = [
+                  [ 5,     20 ],
+                  [ 480,   90 ],
+                  [ 250,   50 ],
+                  [ 100,   33 ],
+                  [ 330,   95 ],
+                  [ 410,   12 ],
+                  [ 475,   44 ],
+                  [ 25,    67 ],
+                  [ 85,    21 ],
+                  [ 220,   88 ]
+              ];
+
+    d3.select("body").selectAll("div")
+        .data(dataset)
+        .enter()
+        .append("div")
+        .attr("class", "bar")
+        .style("height", function(d) {
+            var barHeight = d*5;
+            return barHeight + "px";
+});
+var svg = d3.select("body")
+            .append("svg")
+            .attr("width", 1000)
+            .attr("height", 50);
+
+    var round = svg.selectAll("circle")
+    .data(dataset)
+    .enter()
+    .append("circle");
+
+
+    round.attr("cx", function(d, i) {
+            return (i * 50) + 25;
+        })
+       .attr("cy", 50/2)
+       .attr("r", function(d) {
+            return d;
+       })
+       .attr("fill","blue");
+
+        </script>
+   <div class="separator"></div>
+   <p>Yo </p>
+   <svg width="500" height="100"> </svg>
+    </body>
+</html>   
