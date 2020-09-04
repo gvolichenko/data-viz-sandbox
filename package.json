@@ -26,6 +26,7 @@
     "node-fetch": "^2.6.0",
     "regenerator-runtime": "^0.13.7",
     "topojson": "^1.6.27",
+    "topojson-server": "^3.0.1",
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.5"
   },

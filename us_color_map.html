@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>D3 Test</title>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <script src="https://unpkg.com/topojson-client@3"></script>
+        <script src="d3.legend.js"></script>
+        <style>
+            #state:hover{
+                cursor:pointer;
+                stroke:red;
+                stroke-width: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        
+  
+  <script type="text/javascript">
+    var dataset = [
+            [ 0,     20 ],
+            [ 600,   300 ],
+            [ 250,   50 ],
+            [ 100,   33 ],
+            [ 330,   95 ],
+            [ 400,   12 ],
+            [ 475,   44 ],
+            [ 25,    67 ],
+            [ 85,    21 ],
+            [ 220,   88 ]
+        ];
+
+//Width and height
+var w = 3000;
+var h = 2000;
+const padding = 10;
+const margin=30;
+
+
+//Create SVG element
+var svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)
+      .attr("height", h);
+
+  
+const us = d3.json('data/states-albers-10m.json')
+    .then(function(us) {
+        const format = d => `${d}%`;
+        const geopath = d3.geoPath();
+        
+        const color = d3.scaleQuantize([1, 7], d3.schemeBlues[6]);
+        
+        d3.csv( "/data/unemployment201907.csv",({name, rate}) => [name, +rate])
+            .then(function(unempl){
+                
+                console.log(unempl);
+                let udata = Object.assign(new Map(unempl), {title:"Unemployment rate (%)"});
+                console.log(udata);
+                
+
+        svg.append("g")
+            .attr("transform", "translate(610,20)")
+            .append(() => legend({color, title: "Some title", width: 260}));
+
+        console.log(udata.get("Alabama"));
+        svg.append("g")
+            .selectAll("path")
+            .data(topojson.feature(us, us.objects.states).features)
+            .join("path")
+            .attr("fill", d => color(udata.get(d.properties.name)))
+            .attr("d", geopath)
+            .attr("id","state")
+            .append("title")
+            .text(d => `${d.properties.name}
+        ${format(udata.get(d.properties.name))}`);
+        
+        
+/*
+        svg.append("path")
+            .datum(topojson.mesh(us, us.objects.states, (a, b) => a !== b))
+            .attr("fill", "none")
+            .attr("stroke", "white")
+            .attr("stroke-linejoin", "round")
+            .attr("d", geopath); 
+*/
+            });
+
+        
+        
+        //const data = Object.assign(new Map(), {title: "Unemployment rate (%)"});
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+    </body>
+</html>   

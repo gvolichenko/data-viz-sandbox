@@ -7,10 +7,18 @@
         <script src="https://unpkg.com/topojson-client@3"></script>
         <script src="d3.legend.js"></script>
         <style>
-            #state:hover{
+            .state:hover{
                 cursor:pointer;
-                stroke:red;
+                fill:#16db68;
                 stroke-width: 2px;
+            }
+            .place:hover{
+                cursor:pointer;
+                transition-duration:2s;
+                r:8;
+                fill:#0c992b;
+                stroke-width: 2px;
+                stroke:#e1fa91;
             }
         </style>
     </head>
@@ -45,52 +53,113 @@ var svg = d3.select("body")
       .attr("height", h);
 
   
-const us = d3.json('data/states-albers-10m.json')
+const us = d3.json('data/ru_states_places3.json')
     .then(function(us) {
         const format = d => `${d}%`;
-        const geopath = d3.geoPath();
+
+        const proj = d3.geoMercator()
+        .scale(300)
+        .center([100, 70]);
+
+        const geopath = d3.geoPath().projection(proj);
         
-        const color = d3.scaleQuantize([1, 7], d3.schemeBlues[6]);
         
-        d3.csv( "/data/unemployment201907.csv",({name, rate}) => [name, +rate])
-            .then(function(unempl){
+        //d3.csv( "/data/unemployment201907.csv",({name, rate}) => [name, +rate])
+          //  .then(function(unempl){
                 
-                console.log(unempl);
-                let udata = Object.assign(new Map(unempl), {title:"Unemployment rate (%)"});
-                console.log(udata);
+            
                 
 
-        svg.append("g")
-            .attr("transform", "translate(610,20)")
-            .append(() => legend({color, title: "Some title", width: 260}));
+       
 
-        console.log(udata.get("Alabama"));
+        // State shapes
         svg.append("g")
             .selectAll("path")
-            .data(topojson.feature(us, us.objects.states).features)
-            .join("path")
-            .attr("fill", d => color(udata.get(d.properties.name)))
+            .data(topojson.feature(us, us.objects.subunits).features)
+            .call(d => console.log(d))
+            .enter()
+            .append("path")
             .attr("d", geopath)
-            .attr("id","state")
+            .attr("class","state")
+            .attr("fill","#75d99f")
             .append("title")
-            .text(d => `${d.properties.name}
-        ${format(udata.get(d.properties.name))}`);
+            .text(d => `${d.properties.name_ru}`);
         
-        
-/*
-        svg.append("path")
-            .datum(topojson.mesh(us, us.objects.states, (a, b) => a !== b))
+        //svg.append("g")
+          //  .attr("transform", "translate(610,20)");
+        // Border lines
+          svg.append("path")
+            .datum(topojson.mesh(us, us.objects.subunits, (a, b) => a !== b))
             .attr("fill", "none")
-            .attr("stroke", "white")
+            .attr("stroke", "#e1fa91")
             .attr("stroke-linejoin", "round")
             .attr("d", geopath); 
-*/
-            });
+            
+        
+/*
+// Adding cities as individual clickable objects
+        svg.selectAll("path.city")
+        .data(topojson.feature(us, us.objects.places).features)
+         .enter().append("path") 
+            
+            //.join("path")
+            .call(d => console.log(d))
+            .attr("d", geopath)
+            .attr("class", "place")
+            .append("title")
+            .text(d => `${d.properties.name_ru}`);
+            */
+
+        svg.selectAll("circle")
+            .data(us.objects.places.geometries) // 
+            .enter()
+            .append("circle")
+            .attr("class", "place")
+            .attr("cx",d => proj(d.coordinates)[0])
+            .attr("cy",d => proj(d.coordinates)[1])
+            .attr("fill","#3ab555")
+            .attr("r",2)
+            .append("title")
+            .text(d => `${d.properties.name_ru}`);
+            
+        
+            
+            
+            
+       //console.log(us.objects.places.geometries[0].coordinates)
+        // Adding cities as simple circles
+        
+        });
+
+            /*
+        
+        svg.selectAll("circle")
+            .data(topojson.feature(us, us.objects.places).features)
+            .enter()
+            .call(d => console.log(d))
+    .append("circle")
+            .attr("cx", function(d) {
+        return xScale(d[0]);
+        })
+            .attr("cy", function(d) {
+        return yScale(d[1]);
+        })
+            .attr("r", 5)
+
+/* This adds all the cities as the same dot
+            svg.append("path")
+    .datum(topojson.feature(us, us.objects.places))
+    .attr("d", geopath)
+    .attr("pointRadius",0.1)
+    .attr("class", "place");
+    */
+
 
         
         
-        //const data = Object.assign(new Map(), {title: "Unemployment rate (%)"});
-    });
+        
+        
+ //   });
 
 
 
