@@ -2,7 +2,9 @@ var geojson;
 let startCoords = [64.853337, 96.519000];
 let startZoom = 3;
 
-const data = d3.json('data/states_ru.json')
+// Chukotka is currently a heavy MultiPolygon. Need to find a lighter version. Could use the original file with +360 to imply wrapping
+// https://docs.mapbox.com/mapbox.js/example/v1.0.0/cross-date-line/
+const data = d3.json('data/regions_pop_ru.json')
 .then(function(data) {
     
     console.log(data);
@@ -21,15 +23,25 @@ const data = d3.json('data/states_ru.json')
 
     
     function style(feature) {
+        
+        //console.log(Number(feature.properties[2019].value.replace(/\s/g, '')));
         return {
-            fillColor: "#75d99f",
+            //fillColor: getColor(feature.properties[2019].value),
+            fillColor: getColor(Number(feature.properties[2019].value.replace(/\s/g, ''))),
             weight: 2,
             opacity: 1,
             color: "white",
             dashArray: '3',
-            fillOpacity: 0.7
+            fillOpacity: 0.8
         };
     }
+
+    const getColor = d3.scaleSequential()
+    .domain([0, 12500000])
+    .interpolator(d3.interpolateReds);
+    
+
+
 
     function highlightFeature(e) {
         
@@ -64,7 +76,7 @@ const data = d3.json('data/states_ru.json')
             zoomState=1;
         }
         // if the previous state was zoomed
-        else { // ISSUE: to unzoom click needs to be within the geojson
+        else { // ISSUE: to unzoom click needs to be within the geojson defined shape
             map.setView(startCoords, startZoom);
             // make the state unzoomed
             zoomState=0;
@@ -105,16 +117,16 @@ const data = d3.json('data/states_ru.json')
     info.update = function (props) {
         if(props){
             this._div.classList.remove("hovering");
-            this._div.innerHTML = `${props.name_en}` ;
+            this._div.innerHTML = `${props.region}` ;
         }
         else{
             this._div.classList.add("hovering");
             this._div.innerHTML =  '• Hover to see region name <br /> • Click for more detail'  ;
         }
     };
-
+    // use this function to show detail info upon click
     info.updateClick = function (props) {
-        this._div.innerHTML = `${props.name_ru}`;
+        this._div.innerHTML = `${props.region}`;
     };
 
     info.addTo(map);
